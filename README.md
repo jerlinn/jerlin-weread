@@ -1,4 +1,4 @@
-# jerlin-weread
+# jerlin-weread-skill
 
 微信读书官方 Skill 的重构版。Agent 不用每次把整份接口文档读一遍再自己重复拼请求，改为一条命令直接调，需要什么查什么。
 

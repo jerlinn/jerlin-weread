@@ -17,7 +17,7 @@ author: jerlin
 | 书架 | `shelf` | `references/shelf.md` |
 | 阅读统计/时长/偏好 | `readdata` | `references/readdata.md` |
 | 笔记/划线/想法 | `notebooks` `bookmarks` `my-reviews` | `references/notes.md` |
-| 热门划线/划线下想法 | `best-bookmarks` `read-reviews` `underlines` | `references/notes.md` |
+| 热门划线/划线下想法 | `best-bookmarks` `read-reviews` `underlines` `review-detail` | `references/notes.md` |
 | 公开点评 | `reviews` | `references/review.md` |
 | 推荐好书 | `recommend` `similar` | `references/discover.md` |
 | 用户阅读概况 | (组合) | `references/profile.md` |
