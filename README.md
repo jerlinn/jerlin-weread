@@ -1,8 +1,6 @@
 # jerlin-weread
 
-基于微信读书官方 Skill 的重构版本。
-
-核心改动：API spec 下沉到 CLI 按需获取，领域知识从 few-shot 示例提炼为决策规则和语义陷阱，移除 Agent 可自行推断的常识描述。Agent 每次请求只加载路由表 + 对应领域 reference，不再全量读入 API 文档。
+微信读书官方 Skill 的重构版。Agent 不用每次把整份接口文档读一遍再自己重复拼请求，改为一条命令直接调，需要什么查什么。
 
 ## 安装
 
@@ -19,20 +17,18 @@ npx skills add jerlinn/jerlin-weread
 ## 结构
 
 ```
-jerlin-weread-skill/
-├── SKILL.md              意图路由 + 通用规则
-├── scripts/weread.sh     API CLI, 17 个子命令 (weread.sh -h)
-└── references/           语义陷阱、计算规则、工作流
+├── SKILL.md                意图路由 + 通用规则
+├── scripts/weread.sh       CLI, 17 个子命令, -h 查参数和回包
+└── references/             语义陷阱、规则、工作流
 ```
 
-## 主要优化
+## 面向 Agent 重新设计
 
-官方版本将 API 规格和领域知识混合在多个 markdown 中。本版本做关注点分离：
-
-- API 调用机制收编为 CLI 脚本，Agent 通过 `-h` 按需查阅参数和回包字段
-- 领域知识从 few-shot 重构为推理规则，编码决策边界和语义陷阱而非罗列正确/错误示例
-- 移除 Agent 可推断的流程描述和常识说明，只保留不可推断的信号
+1. API 调用收进 CLI 脚本，读 reference 做决策，精准组合对应接口，`-h` 按需查用法
+2. 领域知识从示例升维为规则，编码决策边界和语义陷阱
+3. 砍掉 Agent 不需要的常识性描述
+4. 新增阅读画像构建，组合行为数据和驱动层采集，生成可持续迭代的读者档案
 
 ## Credits
 
-基于微信读书官方团队的 [WeRead Skill](https://weread.qq.com/r/weread-skills) 优化。API 接口和数据归微信读书所有，使用需遵守其服务条款。本项目仅重构 Skill 的文档结构和 Agent 交互方式。
+基于微信读书官方团队的 [WeRead Skill](https://weread.qq.com/r/weread-skills) 优化。API 接口和数据归微信读书所有，使用需遵守其服务条款。

@@ -21,8 +21,9 @@ author: jerlin
 | 公开点评 | `reviews` | `references/review.md` |
 | 推荐好书 | `recommend` `similar` | `references/discover.md` |
 | 用户阅读概况 | (组合) | `references/profile.md` |
+| 阅读画像 | (组合 + AskUser) | `references/reading-profile.md` |
 
-调用任何接口前，必须先阅读对应 reference 确认字段含义、计数口径和工作流。回包字段名和直觉含义冲突时，服从 reference 说明。
+CRITICAL: 调用任何接口前，先阅读对应 reference 确认字段含义、计数口径和工作流。回包字段名和直觉含义冲突时，服从 reference 说明。
 
 ## 鉴权
 
@@ -52,3 +53,4 @@ author: jerlin
 range 解析：划线接口返回的 range 格式为 `起始-结束`（如 `900-2004`），拆分后分别填入 rangeStart 和 rangeEnd。
 
 划线位置链接的生成条件：回包同时包含 chapterUid 和 range。整本书评或无法定位到划线的点评不生成此链接。userVid 从上下文获取或省略。
+ 

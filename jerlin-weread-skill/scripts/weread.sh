@@ -4,14 +4,10 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SKILL_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-
 GATEWAY="https://i.weread.qq.com/api/agent/gateway"
 
 resolve_api() {
   case "$1" in
-    list-apis)       echo "/_list" ;;
     search)          echo "/store/search" ;;
     book-info)       echo "/book/info" ;;
     chapters)        echo "/book/chapterinfo" ;;
@@ -28,36 +24,35 @@ resolve_api() {
     notebooks)       echo "/user/notebooks" ;;
     recommend)       echo "/book/recommend" ;;
     similar)         echo "/book/similar" ;;
+    list-apis)       echo "/_list" ;;
     *) return 1 ;;
   esac
 }
 
 show_global_help() {
   cat <<'EOF'
-weread.sh
-
-Usage: weread.sh <subcommand> [--param=value ...] [-h]
+weread.sh <subcommand> [--param=value ...] [-h]
 
 Subcommands:
-  search           搜索书籍
-  book-info        书籍基本信息
-  chapters         章节目录
-  progress         阅读进度
-  shelf            书架同步
-  notebooks        笔记本概览
-  bookmarks        单本书划线内容
-  best-bookmarks   书籍热门划线
-  underlines       章节划线热度统计
-  read-reviews     划线下的想法/评论
-  my-reviews       单本书个人想法与点评
-  review-detail    单条想法详情
-  reviews          书籍公开点评
-  readdata         阅读统计
-  recommend        个性化推荐
-  similar          相似书推荐
-  list-apis        列出所有可用接口
+  search --keyword          搜索书籍
+  book-info --bookId        书籍基本信息
+  chapters --bookId         章节目录
+  progress --bookId         阅读进度
+  shelf                     书架同步
+  notebooks                 笔记本概览
+  bookmarks --bookId        单本书划线内容
+  best-bookmarks --bookId   书籍热门划线
+  underlines --bookId --chapterUid  章节划线热度
+  read-reviews --bookId --chapterUid --reviews=JSON  划线下想法
+  my-reviews --bookid       单本书个人想法与点评
+  review-detail --reviewId  单条想法详情
+  reviews --bookId          书籍公开点评
+  readdata --mode           阅读统计
+  recommend                 个性化推荐
+  similar --bookId          相似书推荐
+  list-apis                 列出所有可用接口
 
-Auth: \$WEREAD_API_KEY (格式 wrk-xxxxxxxx)
+Auth: $WEREAD_API_KEY (格式 wrk-xxxxxxxx)
 EOF
 }
 
@@ -522,21 +517,18 @@ call_api() {
   fi
 
   local json
-  json=$(jq -n --arg api "$api_name" '{api_name: $api}')
-
-  for arg in "$@"; do
-    local key="${arg%%=*}"
-    key="${key#--}"
-    local val="${arg#*=}"
-
-    if echo "$val" | grep -qE '^-?[0-9]+$'; then
-      json=$(echo "$json" | jq --arg k "$key" --argjson v "$val" '. + {($k): $v}')
-    elif [ "${val#[}" != "$val" ] || [ "${val#\{}" != "$val" ]; then
-      json=$(echo "$json" | jq --arg k "$key" --argjson v "$val" '. + {($k): $v}')
-    else
-      json=$(echo "$json" | jq --arg k "$key" --arg v "$val" '. + {($k): $v}')
-    fi
-  done
+  if [ $# -eq 0 ]; then
+    json=$(jq -nc --arg a "$api_name" '{api_name: $a}')
+  else
+    json=$(printf '%s\n' "$@" | jq -Rnc --arg a "$api_name" '
+      {api_name: $a} + ([inputs | ltrimstr("--") |
+        (index("=") // length) as $i |
+        {(.[0:$i]): (.[$i+1:] |
+          if test("^-?[0-9]+$") then tonumber
+          elif test("^[\\[{]") then fromjson
+          else . end)}
+      ] | add)')
+  fi
 
   curl -sS -X POST "$GATEWAY" \
     -H "Authorization: Bearer $WEREAD_API_KEY" \
